@@ -1,0 +1,68 @@
+import time
+import requests
+import json
+import os
+import logging
+import datetime
+
+data = {
+    "data":json.dumps({"Component_Billboard_Billboardlist": {"cid": 4418219809678869, "count": 20}})
+}
+
+headers={"x-xsrf-token":"BEfxukt__d_wQ7PKhX-r1Gl4","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36","referer": "https://weibo.com/tv/billboard/4418219809678869","content-type": "application/x-www-form-urlencoded","cookie":"SINAGLOBAL=2178368568775.062.1601448980834; UM_distinctid=17588ba37d47db-0bde71c56471bc-303464-1fa400-17588ba37d58f3; UOR=cdpn.io,service.weibo.com,www.xiaoso.net; _ga=GA1.2.1327174152.1608083553; SUB=_2AkMovnQEf8NxqwJRmPERzWjnbI12yArEieKe4oXfJRMxHRl-yT9jqmkstRB6Az5a69Dd0vKhDE8GwP-tuFTwntMk5wdj; SUBP=0033WrSXqPxfM72-Ws9jqgMF55529P9D9WhTVxA.zoTbhv.9UODOHESx; YF-V-WEIBO-G0=b09171a17b2b5a470c42e2f713edace0; _s_tentry=-; Apache=1426700304047.4902.1608970985416; ULV=1608970985537:4:2:2:1426700304047.4902.1608970985416:1608710963082; XSRF-TOKEN=BEfxukt__d_wQ7PKhX-r1Gl4; login_sid_t=1cdcc9449bef81e373c4093dfd5e893a; cross_origin_proto=SSL; WBStorage=8daec78e6a891122|undefined; wb_view_log=1920*10801"}
+
+response = requests.post("https://weibo.com/tv/api/component?page=%2Ftv%2Fbillboard%2F4418219809678869", data = data,headers = headers)
+
+while json.loads(response.text)['data']['Component_Billboard_Billboardlist'] is None:
+    response = requests.post("https://weibo.com/tv/api/component?page=%2Ftv%2Fbillboard%2F4418219809678869", data = data,headers = headers)
+
+next_cursor = json.loads(response.text)['data']['Component_Billboard_Billboardlist']['next_cursor']
+
+list = json.loads(response.text)['data']['Component_Billboard_Billboardlist']['list']
+
+for num in range(10):
+    # time.sleep(5)
+    data = {
+    "data":json.dumps({"Component_Billboard_Billboardlist": {"cid": 4418219809678869,"next_cursor": next_cursor,"count": 20}})
+    }
+    response = requests.post("https://weibo.com/tv/api/component?page=%2Ftv%2Fbillboard%2F4418219809678869", data = data,headers = headers)
+
+    while json.loads(response.text)['data']['Component_Billboard_Billboardlist'] is None:
+        response = requests.post("https://weibo.com/tv/api/component?page=%2Ftv%2Fbillboard%2F4418219809678869", data = data,headers = headers)
+
+    next_cursor = json.loads(response.text)['data']['Component_Billboard_Billboardlist']['next_cursor']
+    list.extend(json.loads(response.text)['data']['Component_Billboard_Billboardlist']['list'])
+
+print(list)
+for item in list:
+    time.sleep(5)
+    data = {
+        "data":json.dumps({"Component_Play_Playinfo":{"oid":item['oid']}})
+    }
+    response = requests.post("https://weibo.com/tv/api/component?page=%2Ftv%2Fshow%2F1034%3A4585353810739202", data = data,headers = headers)
+
+    if json.loads(response.text)['data']['Component_Play_Playinfo'] is None:
+        continue
+
+    title = json.loads(response.text)['data']['Component_Play_Playinfo']['title']
+    urls = json.loads(response.text)['data']['Component_Play_Playinfo']['urls']
+    source= 'https://weibo.com/tv/show/'+json.loads(response.text)['data']['Component_Play_Playinfo']['idstr']
+    url = ''
+    if urls.get('高清 1080P') is not None and urls['高清 1080P']!= '':
+        url = urls['高清 1080P']
+    elif urls.get('高清 720P') is not None and urls.get('高清 720P') != '':
+        url = urls['高清 720P']
+    elif urls.get('标清 480P') is not None and urls.get('标清 480P') != '':
+        url = urls['标清 480P']
+    else:
+        continue
+
+    logging.info(' title:'+title + 'source:'+source+' 下载成功')
+    print(' title:'+title+ 'source:'+source+' 下载成功')
+
+    file_path = 'C:/weiboDownload/' + title + '.mp4'
+    vedioFile = requests.get('http:'+url)
+
+    with open(file_path, 'wb') as f:
+        f.write(vedioFile.content)
+        f.close
