@@ -28,6 +28,9 @@ def downloadAndUpload():
         for weiboInfo in weiboInfoList:
             if weiboInfo['video_url'] is None or weiboInfo['video_url'] == '':
                 continue
+                
+            if str(datetime.date.today()) == weiboInfo['created_at']:
+                continue
 
             file_path = 'C:/download/weiboDownload/' + weiboInfo['text'] + '.mp4'
             vedioFile = requests.get(weiboInfo['video_url'])
