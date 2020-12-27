@@ -1,0 +1,16 @@
+2020-12-27 17:58:58,619 - ERROR - weibo.py[:1076] - 'id'
+Traceback (most recent call last):
+  File "c:\Develop\python\uploadBili\weibo.py", line 1045, in get_pages
+    self.print_user_info()
+  File "c:\Develop\python\uploadBili\weibo.py", line 564, in print_user_info
+    logger.info(u'用户id：%s', self.user['id'])
+KeyError: 'id'
+2020-12-27 17:59:44,025 - ERROR - weibo.py[:649] - 'object_id'
+Traceback (most recent call last):
+  File "c:\Develop\python\uploadBili\weibo.py", line 630, in get_one_weibo
+    retweet = self.get_long_weibo(retweet_id)
+  File "c:\Develop\python\uploadBili\weibo.py", line 289, in get_long_weibo
+    weibo = self.parse_weibo(weibo_info)
+  File "c:\Develop\python\uploadBili\weibo.py", line 557, in parse_weibo
+    weibo['object_id'] = weibo_info['page_info']['object_id']
+KeyError: 'object_id'
